@@ -1,3 +1,5 @@
 node_modules
 .Ds_store
 npm-debug.log
+quiz.sqlite
+.env
