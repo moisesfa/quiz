@@ -33,6 +33,38 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(partials());
 
+
+// MIDDLEWARE DE AUTO-LOGOUT
+// ========================================================================
+app.use(function(req, res, next){
+
+ // Si existe sesion:
+ if (req.session.user){
+  // Crear la variable de sesion transAntTime en caso de que no exista
+  // Tiempo de la transaccion anterior 
+  // Si existe => controlar si ha tardado mas de 2 tiempo desde la ultima conexion
+  // Si es asi => destruir la sesion
+  if (req.session.transAntTime){
+    // La función getTime() ... devuelve el tiempo en milisegundos
+    var transActTime = new Date().getTime();
+    var diferencia = transActTime - req.session.transAntTime;
+    // Ver si han transcurrido mas de 2 MINUTOS:
+    if (diferencia > (1000*60*2)){
+      // Destruir las variables de sesion:
+      delete req.session.user;
+      delete req.session.transAntTime;
+    }else{
+      // Almacenar la nueva hora:
+      req.session.transAntTime = transActTime;
+    }
+  }else{
+    req.session.transAntTime = new Date().getTime();
+  }
+}
+ next();
+});
+
+
 // Helpers dinamicos:
 app.use(function(req, res, next) {
 
